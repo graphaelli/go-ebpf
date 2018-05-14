@@ -27,7 +27,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 
-	"github.com/andrewkroh/go-ebpf/exec"
+	"github.com/graphaelli/go-ebpf/exec"
 )
 
 var log = logrus.WithField("selector", "main")

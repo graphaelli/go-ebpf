@@ -74,5 +74,5 @@
 			"revision": ""
 		}
 	],
-	"rootPath": "github.com/andrewkroh/go-ebpf"
+	"rootPath": "github.com/graphaelli/go-ebpf"
 }

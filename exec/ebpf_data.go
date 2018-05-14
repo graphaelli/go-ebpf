@@ -23,7 +23,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/andrewkroh/go-ebpf/common"
+	"github.com/graphaelli/go-ebpf/common"
 )
 
 var (

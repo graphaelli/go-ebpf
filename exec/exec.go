@@ -26,7 +26,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/procfs"
 
-	"github.com/andrewkroh/go-ebpf/common"
+	"github.com/graphaelli/go-ebpf/common"
 )
 
 // clockHz is the clock tick rate (/proc/PID/stat gives start time in ticks).

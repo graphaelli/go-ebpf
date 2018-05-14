@@ -25,7 +25,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/andrewkroh/go-ebpf/exec"
+	"github.com/graphaelli/go-ebpf/exec"
 )
 
 func TestNewMonitor(t *testing.T) {

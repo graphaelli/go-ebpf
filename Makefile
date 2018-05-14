@@ -8,11 +8,11 @@ all: execsnoop
 
 check:
 	@go get golang.org/x/tools/cmd/goimports
-	@goimports -l -local github.com/andrewkroh . | (! grep .) || (echo "Code differs from goimports' style ^" && false)
+	@goimports -l -local github.com/graphaelli . | (! grep .) || (echo "Code differs from goimports' style ^" && false)
 	@go run scripts/check_copyright.go .
 
 fmt:
-	@goimports -l -w -local github.com/andrewkroh .
+	@goimports -l -w -local github.com/graphaelli .
 
 clean:
 	@rm -rf build cmd/execsnoop/execsnoop
@@ -33,8 +33,8 @@ execsnoop-test: build_dir
 # For building inside of a Docker environment.
 docker-all: build-docker-image
 	$(SUDO) docker run --rm \
-		-v $(PWD):/go/src/github.com/andrewkroh/go-ebpf \
-		--workdir=/go/src/github.com/andrewkroh/go-ebpf \
+		-v $(PWD):/go/src/github.com/graphaelli/go-ebpf \
+		--workdir=/go/src/github.com/graphaelli/go-ebpf \
 		$(DOCKER_IMAGE) \
 		make all
 	# Fixing permissions on files generated in Docker.
@@ -42,8 +42,8 @@ docker-all: build-docker-image
 
 docker-run:
 	$(SUDO) docker run -it --rm \
-		-v $(PWD):/go/src/github.com/andrewkroh/go-ebpf \
-		--workdir=/go/src/github.com/andrewkroh/go-ebpf \
+		-v $(PWD):/go/src/github.com/graphaelli/go-ebpf \
+		--workdir=/go/src/github.com/graphaelli/go-ebpf \
 		$(DOCKER_IMAGE) /bin/bash
 
 build-docker-image:
