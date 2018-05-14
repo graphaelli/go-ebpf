@@ -15,16 +15,16 @@
 			"revisionTime": "2017-10-02T20:02:53Z"
 		},
 		{
-			"checksumSHA1": "GzyPSwjBWbCzbXzJQiAuwDDMTmw=",
+			"checksumSHA1": "j0YlRGh0FHfLwI3W+EIFmiYZt1E=",
 			"path": "github.com/iovisor/gobpf/elf",
-			"revision": "4dc1144cd2a0cc5dbae0b4db4691bd5a84ecc602",
-			"revisionTime": "2017-09-12T15:33:54Z"
+			"revision": "c4ceec67cf1a399308813f890adfe89dea1f0a20",
+			"revisionTime": "2018-05-12T18:15:22Z"
 		},
 		{
 			"checksumSHA1": "5WkG5igak593xRbqa+dmbEr4VDs=",
 			"path": "github.com/iovisor/gobpf/elf/include",
-			"revision": "4dc1144cd2a0cc5dbae0b4db4691bd5a84ecc602",
-			"revisionTime": "2017-09-12T15:33:54Z"
+			"revision": "c4ceec67cf1a399308813f890adfe89dea1f0a20",
+			"revisionTime": "2018-05-12T18:15:22Z"
 		},
 		{
 			"checksumSHA1": "oCkTxswYPo40CSinHng80yaFFmo=",
