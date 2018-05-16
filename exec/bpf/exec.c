@@ -15,64 +15,52 @@
  */
 #include <linux/kconfig.h>
 #include <linux/bpf.h>
-#include <linux/ptrace.h>
 #include <linux/sched.h>
-#include <linux/version.h>
-#include <uapi/linux/bpf.h>
-#include <uapi/linux/bpf_perf_event.h>
 #include <uapi/linux/perf_event.h>
 
 #include "bpf_helpers.h"
+
+struct bpf_map_def SEC("maps/events") events = {
+    .type = BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+	.key_size = sizeof(u32),
+	.value_size = sizeof(u32),
+	.max_entries = 1024,
+};
 
 struct bpf_map_def SEC("maps/stack_traces") stack_traces = {
 	.type = BPF_MAP_TYPE_STACK_TRACE,
 	.key_size = sizeof(u32),
 	.value_size = PERF_MAX_STACK_DEPTH * sizeof(u64),
-	.max_entries = 10240,
+	.max_entries = 1024,
 };
 
-struct key_t {
-	char name[TASK_COMM_LEN];
-	u32 pid;
-	u64 kernel_ip;
-    u64 kernel_ret_ip;
-	u32 kernel_stack_id;
-	u32 user_stack_id;
+struct pqexec_data_t {
+        u64 timestamp_ns;
+        u32 tgid;
+        u32 pid;
+        char comm[TASK_COMM_LEN];
+        char query[256];
+        u32 user_stack_id;
 };
 
-SEC("perf_event")
-int do_perf_event(struct bpf_perf_event_data *ctx) {
-    /*
-    if (!(pid == 1))
+SEC("uprobe/pqexec")
+int probe_pqexec(struct pt_regs *ctx) {
+        u64 pid_tgid = bpf_get_current_pid_tgid();
+        u32 tgid = pid_tgid >> 32;
+        u32 pid = pid_tgid; // implicit cast to u32 for bottom half
+
+        struct pqexec_data_t data = {};
+        data.timestamp_ns = bpf_ktime_get_ns();
+        data.tgid = tgid;
+        data.pid = pid;
+        bpf_get_current_comm(&data.comm, sizeof(data.comm));
+
+        // 2nd arg is query
+        bpf_probe_read(&data.query, sizeof(data.query), (void *)PT_REGS_PARM2(ctx));
+        data.user_stack_id = bpf_get_stackid(ctx, &stack_traces, BPF_F_USER_STACK | BPF_F_REUSE_STACKID);
+
+        bpf_perf_event_output(ctx, &events, 0, &data, sizeof(data));
         return 0;
-    */
-    u32 pid = bpf_get_current_pid_tgid() >> 32;
-    struct key_t key = {.pid = pid};
-
-    // fill in command name
-    bpf_get_current_comm(&key.name, sizeof(key.name));
-
-    // get stacks
-    key.kernel_stack_id = bpf_get_stackid(ctx, &stack_traces, 0 | BPF_F_REUSE_STACKID);
-    key.user_stack_id = bpf_get_stackid(ctx, &stack_traces, 0 | BPF_F_REUSE_STACKID | BPF_F_USER_STACK);
-
-    // from BCC profile.py (Apache 2.0 License)
-    if (key.kernel_stack_id >= 0) {
-        // populate extras to fix the kernel stack
-        struct pt_regs regs = {};
-        bpf_probe_read(&regs, sizeof(regs), (void *)&ctx->regs);
-        u64 ip = PT_REGS_IP(&regs);
-
-        // if ip isn't sane, leave key ips as zero for later checking
-#ifdef CONFIG_RANDOMIZE_MEMORY
-        if (ip > __PAGE_OFFSET_BASE) {
-#else
-        if (ip > PAGE_OFFSET) {
-#endif
-            key.kernel_ip = ip;
-        }
-    }
-    return 0;
 }
 
 // Code is licensed under Apache 2.0 which is GPL compatible.
@@ -80,4 +68,4 @@ char _license[] SEC("license") = "GPL";
 
 // This number will be interpreted by the elf loader to set the current
 // running kernel version.
-__u32 _version SEC("version") = 0xFFFFFFFE;
+u32 _version SEC("version") = 0xFFFFFFFE;

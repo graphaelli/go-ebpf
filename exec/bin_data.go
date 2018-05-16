@@ -32,7 +32,7 @@ func asset(key string) ([]byte, error) {
 		assets = map[string][]byte{}
 
 		var value []byte
-		value, _ = base64.StdEncoding.DecodeString("H4sIAAAAAAAC/6yUP2zTQBTGPyctKSlCFUPFnw4ZGMJAiBiAAQmrEpAhQ8SAmDDGXNSKJo1sq6QJEl2QOrIgMdItY7ewpSNjRsaOjGx0QBjd3efGOdvtwpPqX9/ne37n71784XHzScGyEIeF35hlszgqzv63eV2Ghcmq1j4CuAxgXNL5cHAcSb4DUAHglXU+HJyQv8if5A9yqjg50M8pWcA0iqJxAVhhH8mJq+9fLczvcyz3uaDX3VB9db8z1y8m1//hPr6TR+Q38pAckV/JL+Qncp/cI/tkj9wgX5EvyBbZIG3yAVknqymfqvRpJHVvdi4LAHYP9H7l+5+e734U3b6is+F1fQ5j3vpMllh/In2qznv3tNXE3yhSdSvx/AyeYen9snVJ9uJfHMdZg2VEW12LmGasLaKY0h6p3hdS+j2ll1L6qtLTz7ml9MWUvnf6u4Dqcmjka4lcjVYtFP0QNV9s9YTfdsSO6IZ4s+0kso7bC+4Eoeu9dULf9UQAZ0f4weZ2F87Wpie6gVAPqIkNp+27HYFaEPqh+xq1YLcj2Vxfrzt38R/iufI1HS2KHUO3MvLYi2TYOf0WjPzaOfXmzCwZ6+QJX8zoU+H+K8zLfM+4Pp7Xm+xvelDhd2LtnP3bOfUPC9nrTf/u59TbOfVm3kzOXiIaFOo4279Gjn92cd6nMmtN/15m9JbRpzhKvHfS//i78A8AAP//AQAA//+tXHi7gAYAAA==")
+		value, _ = base64.StdEncoding.DecodeString("H4sIAAAAAAAC/6yUMWzTThTGPzvJP/k3EYqEhELpkAXUKckGEkuWAkOHqgNiC645lIokTW1T0oIEC1IHBhYkRpAYMjB0S7YwMjJmzMCQkY1MMbq7z8Sx47YDT3J+ft+7d+/u3Tmvt7bvmYaBwAz8xsJbWC29eK/ztwADo2taewvgCoBRVvsDTvJyfeZr/iKn5IQckz/I7+Q3ckiekX3yE/mRfE+ekm/IHtklm+Rj8hG5Qz4g6+QdskZukmWyRBbJHAlyNuf+yek86FdG+mtj5Y8Odb9eGEAZgL0+Ubp98lPHP+t41gCmc98fmECR80ge201Ex804Th6oHCePcGTpeMlcPt9BSi9Ijrsh667pcxt94XxpYDz3/XPzJTPAJutdlz7jH8h06EF6eY4spVkqHru/s4257/vF4J6e7CL3Km8U5Fr4/L2rJi5lKaRiWkX1MxvTbyo9F9MLSs/E9C2lx+cvKf2/mD40gu8PKjoL+bIVG1j4KlTxRM9D2+q6VXEkOp6r313Psp81PMeyhYvGkXDc/YMOGq19W3RcgYojWhXRbDx1rLZA1znYE43uoegJW4WeK6UaKK7neNYeKu5xW/Jf2BPV97gNKXoR3VjhBz0KWz2hXuQa4eEF+dG7Ez3xXQD/r6hzyvWX6ee5zyC/GLrjxooedFl344L1X03If3fJ/GpCft9cPT7a/1sJ+V8T8qP+XeZHP9EzCjWc3//bCf3vp5b7nOe4aP9bK2pLm1Dsh/ZthvKD/5c/AAAA//8BAAD//2Y8/kswBwAA")
 		value, _ = gzipDecode(value)
 		assets["exec.o"] = value
 	}

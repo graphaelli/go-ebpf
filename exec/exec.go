@@ -16,18 +16,24 @@
 
 package exec
 
+import "C"
 import (
 	"bytes"
+	"encoding/binary"
+	"strconv"
+	"time"
+	"unsafe"
+
 	"github.com/Sirupsen/logrus"
-	bpf "github.com/iovisor/gobpf/elf"
 	"github.com/pkg/errors"
-	"fmt"
+	bpf "github.com/iovisor/gobpf/elf"
 )
 
 // probe and map names in the eBPF program.
 const (
-	perfEventProbe = "perf_event"
-	stackTraceMap  = "stack_traces"
+	perfEventLocation = "/usr/lib/x86_64-linux-gnu/libpq.so.5.10:0x15b40"
+	perfEventProbe    = "uprobe/pqexec"
+	stackTraceMap     = "stack_traces"
 )
 
 var log = logrus.WithField("selector", "exec")
@@ -50,6 +56,25 @@ func NewMonitor() (*ProcessMonitor, error) {
 	return &ProcessMonitor{}, nil
 }
 
+type perfEvent struct {
+	Time        uint64
+	Tgid        uint32
+	Pid         uint32
+	Command     [16]byte
+	Query       [256]byte
+	UserStackId uint32
+}
+
+type Event struct {
+	Sent       time.Time `json:"sent"`
+	Time       time.Time `json:"time"`
+	Pid        int       `json:"pid"`
+	Tgid       int       `json:"tgid"`
+	Command    string    `json:"command"`
+	Query      string    `json:"query"`
+	Stacktrace []string  `json:"stacktrace"`
+}
+
 func (m *ProcessMonitor) Start(done <-chan struct{}) (<-chan interface{}, error) {
 	if err := m.initBPF(); err != nil {
 		return nil, err
@@ -64,7 +89,22 @@ func (m *ProcessMonitor) Start(done <-chan struct{}) (<-chan interface{}, error)
 		for {
 			select {
 			case data := <-m.bpfEvents:
-				fmt.Println(data)
+				var event perfEvent
+				err := binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &event)
+				if err != nil {
+					log.WithError(err).Error("failed to decode received data")
+					continue
+				}
+				command := (*C.char)(unsafe.Pointer(&event.Command))
+				query := (*C.char)(unsafe.Pointer(&event.Query))
+				m.output <- Event{
+					Sent:       time.Now(),
+					Tgid:       int(event.Tgid),
+					Pid:        int(event.Pid),
+					Command:    C.GoString(command),
+					Query:      C.GoString(query),
+					Stacktrace: []string{strconv.Itoa(int(event.UserStackId))},
+				}
 			case count := <-m.lostBPFEvents:
 				m.lostCount += count
 				log.WithField("total_dropped", m.lostCount).Infof("%v messages from kernel dropped", count)
@@ -92,14 +132,14 @@ func (m *ProcessMonitor) initBPF() error {
 	// Setup our perf event readers.
 	m.bpfEvents = make(chan []byte, 64)
 	m.lostBPFEvents = make(chan uint64, 1)
-	m.perfMap, err = bpf.InitPerfMap(m.module, stackTraceMap, m.bpfEvents, m.lostBPFEvents)
+	m.perfMap, err = bpf.InitPerfMap(m.module, "events", m.bpfEvents, m.lostBPFEvents)
 	if err != nil {
 		m.module.Close()
 		return errors.Wrapf(err, "failed to initialize %v perf map", stackTraceMap)
 	}
 
-	// Enable the kprobes.
-	if err := m.module.EnableKprobe(perfEventProbe, 1); err != nil {
+	// Enable the probe.
+	if err := m.module.EnableUprobe(perfEventProbe, perfEventLocation); err != nil {
 		m.module.Close()
 		return errors.Wrapf(err, "failed to enable %v probe", perfEventProbe)
 	}

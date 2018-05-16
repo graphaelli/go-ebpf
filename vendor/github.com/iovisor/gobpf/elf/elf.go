@@ -360,7 +360,7 @@ func elfReadMaps(file *elf.File, params map[string]SectionParams) (map[string]*M
 		if err != nil {
 			return nil, err
 		}
-		if len(data) != C.sizeof_struct_bpf_map_def {
+		if len(data) > C.sizeof_struct_bpf_map_def {
 			return nil, fmt.Errorf("only one map with size %d bytes allowed per section (check bpf_map_def)", C.sizeof_struct_bpf_map_def)
 		}
 
@@ -536,7 +536,7 @@ func (b *Module) Load(parameters map[string]SectionParams) error {
 
 			secName := rsection.Name
 
-			isKprobe := strings.HasPrefix(secName, "kprobe/")
+			isKprobe := strings.HasPrefix(secName, "kprobe/") || strings.HasPrefix(secName, "uprobe/")
 			isKretprobe := strings.HasPrefix(secName, "kretprobe/")
 			isCgroupSkb := strings.HasPrefix(secName, "cgroup/skb")
 			isCgroupSock := strings.HasPrefix(secName, "cgroup/sock")
@@ -640,7 +640,7 @@ func (b *Module) Load(parameters map[string]SectionParams) error {
 
 		secName := section.Name
 
-		isKprobe := strings.HasPrefix(secName, "kprobe/")
+		isKprobe := strings.HasPrefix(secName, "kprobe/") || strings.HasPrefix(secName, "uprobe/")
 		isKretprobe := strings.HasPrefix(secName, "kretprobe/")
 		isCgroupSkb := strings.HasPrefix(secName, "cgroup/skb")
 		isCgroupSock := strings.HasPrefix(secName, "cgroup/sock")
